@@ -17,5 +17,9 @@ setup(
     ],
     entry_points={
         'console_scripts': ['tasker=tasker.runner:main'],
+    },
+    package_data={
+        # If any package contains *.txt or *.rst files, include them:
+        '': ['*.txt', '*.rst', '*.tac'],
     }
 )
