@@ -1,4 +1,4 @@
-from tasker.task import Task
+from .task import Task
 
 
 class listens_to:
