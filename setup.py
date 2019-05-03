@@ -13,7 +13,6 @@ setup(
     install_requires=[
         'redis',
         'twisted',
-        'django',
     ],
     entry_points={
         'console_scripts': ['tasker=tasker.runner:main'],
