@@ -2,7 +2,7 @@ import json
 import time
 import uuid
 
-from tasker import tasks
+from tasker import constants
 from tasker.utilities import redis_key_with_prefix as _k, redis_connection
 
 
@@ -15,7 +15,7 @@ class Task:
     def create(task_type, **kwargs):
         c = redis_connection()
         c.lpush(
-            _k(tasks.QUEUE_REGULAR_TASKS),
+            _k(constants.QUEUE_REGULAR_TASKS),
             json.dumps({
                 'key': str(uuid.uuid4()),
                 'type': task_type,
@@ -26,7 +26,7 @@ class Task:
     def prioritize(task_type, **kwargs):
         c = redis_connection()
         c.rpush(
-            _k(tasks.QUEUE_REGULAR_TASKS),
+            _k(constants.QUEUE_REGULAR_TASKS),
             json.dumps({
                 'key': str(uuid.uuid4()),
                 'type': task_type,
@@ -37,8 +37,8 @@ class Task:
     def delay_unique(task_type, identifier=None, data=None, delay=10):
         c = redis_connection()
 
-        key_delayed_task_data = _k(tasks.DELAYED_TASK_DATA)
-        key_queue_delayed_tasks = _k(tasks.QUEUE_DELAYED_TASKS)
+        key_delayed_task_data = _k(constants.DELAYED_TASK_DATA)
+        key_queue_delayed_tasks = _k(constants.QUEUE_DELAYED_TASKS)
 
         data_key = "std%s" % identifier
         existing_data = c.hget(key_delayed_task_data, data_key)
@@ -61,7 +61,7 @@ class Task:
 
     @staticmethod
     def _get_next_delayed_task():
-        return redis_connection().zrange(_k(tasks.QUEUE_DELAYED_TASKS), 0, 0,
+        return redis_connection().zrange(_k(constants.QUEUE_DELAYED_TASKS), 0, 0,
                                          withscores=True)
 
     @staticmethod
@@ -85,10 +85,10 @@ class Task:
         #                               "already working on this?" + '\x1b[0m')
         #     return None
 
-        removed = rconn.zrem(_k(tasks.QUEUE_DELAYED_TASKS), item[0][0])
+        removed = rconn.zrem(_k(constants.QUEUE_DELAYED_TASKS), item[0][0])
 
         if removed:
-            data = rconn.hget(_k(tasks.DELAYED_TASK_DATA),
+            data = rconn.hget(_k(constants.DELAYED_TASK_DATA),
                               data_key)
 
             data = json.loads(data)
@@ -105,10 +105,10 @@ class Task:
     @staticmethod
     def fetch_task():
         rconn = redis_connection()
-        queue_length = rconn.llen(_k(tasks.QUEUE_REGULAR_TASKS))
+        queue_length = rconn.llen(_k(constants.QUEUE_REGULAR_TASKS))
 
         if queue_length > 0:
-            m = rconn.rpop(_k(tasks.QUEUE_REGULAR_TASKS))
+            m = rconn.rpop(_k(constants.QUEUE_REGULAR_TASKS))
 
             if not m:
                 return False

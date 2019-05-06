@@ -2,11 +2,7 @@ import time
 import uuid
 
 import redis
-from _mysql_exceptions import OperationalError
-from django.db import connection as database_connection
-from django.db.utils import OperationalError as DjangoOperationalError
 from twisted.python import log
-from django.conf import settings
 
 
 def redis_key_with_prefix(key):
@@ -29,19 +25,6 @@ def redis_connection():
         )
 
     return singleton
-
-
-def db_keepalive():
-    # always have our DB-connection up and running
-
-    try:
-        database_connection.connection.ping()
-    except (OperationalError, DjangoOperationalError, AttributeError):
-        from django import db
-        db.close_old_connections()
-        db.connections.close_all()
-        db.connection.close()
-        log.msg('\x1b[0;37;41m' + "Closing old connections" + '\x1b[0m')
 
 
 def acquire_lock(conn, lock_name, acquire_timeout=10):
